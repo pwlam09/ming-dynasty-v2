@@ -1,0 +1,42 @@
+.board-wrapper {
+    text-align: center;
+}
+
+.board {
+    display: inline-block;
+    position: relative;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+}
+
+.square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow:
+        2px 0 0 0 #888,
+        0 2px 0 0 #888,
+        2px 2px 0 0 #888,
+        /* Just to fix the corner */
+        2px 0 0 0 #888 inset,
+        0 2px 0 0 #888 inset;
+    float: left;
+    -webkit-touch-callout: none;
+}
+
+.square-img {
+    width: 80%;
+}
+
+.square:focus {
+    outline: none;
+}
+
+.drag-timer {
+    position: absolute;
+    width: 10%;
+    z-index: 1;
+}

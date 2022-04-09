@@ -1,11 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
-import { MatchThreeGame } from './features/squares/MatchThreeGame';
+import { HUD } from './features/hud/HUD';
 
 function App() {
   return (
     <div className="App">
-      <MatchThreeGame />
+      <HUD />
     </div>
   );
 }

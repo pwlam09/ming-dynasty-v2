@@ -28,18 +28,20 @@ const timerProgressReducer = (state, action) => {
     }
 }
 
-export const MatchThreeGame = () => {
+export const MatchThreeGame = ({ parentRef }) => {
+    const [gameSize, setGameSize] = useState({ width: 0, height: 0 })
+
     const dispatch = useDispatch()
     const squareImgs = [ppImg, horseImg, fishPng, bigBroPng]
     const squares = useSelector(selectAllSquares)
     const numOfSquaresPerRow = Math.sqrt(squares.length)
     const numOfRow = Math.sqrt(squares.length)
     const boardMargin = 0.1
-    const { height, width } = useWindowDimensions()
-    const initialTimerProgress = 5
+    const { height: screenHeight, width: screenWidth } = useWindowDimensions()
+    const initialTimerProgress = 4
     const boardRef = useRef()
 
-    const minScreenSize = height < width ? height : width
+    const minScreenSize = screenHeight < screenWidth ? gameSize.height : screenWidth
     const squareWidth = minScreenSize * (1-boardMargin*2) / numOfSquaresPerRow
     const squareHeight = minScreenSize * (1-boardMargin*2) / numOfSquaresPerRow
 
@@ -69,10 +71,19 @@ export const MatchThreeGame = () => {
     }, [shouldRefill])
 
     useEffect(() => {
-        if (stateTimerProgress <= 0) {
+        if (stateTimerProgress < 0) {
             handleOnDragEnd()
         }
     }, [stateTimerProgress])
+
+    useEffect(() => {
+        if (parentRef != null) {
+            const parentDiv = parentRef.current
+            const width = parentDiv ? parentDiv.offsetWidth : 0
+            const height = parentDiv ? parentDiv.offsetHeight : 0
+            setGameSize({ width, height })
+        }
+    }, [parentRef])
 
     const calculateSquaresChanged = () => {
         const checkComboInRow = (row) => {
@@ -314,7 +325,8 @@ export const MatchThreeGame = () => {
         >
             <motion.div className="drag-timer"
                 style={{
-                    width: squareWidth * 2/3
+                    width: squareWidth * 2/3,
+                    visibility: dragTimer.show ? 'inherit' : 'hidden'
                 }}
                 animate={{
                     x: dragTimer.x - squareWidth * 2/3,
@@ -326,6 +338,9 @@ export const MatchThreeGame = () => {
                     counterClockwise 
                     value={stateTimerProgress / initialTimerProgress * 100}
                     strokeWidth={20}
+                    style={{
+                        opacity: dragTimer.show ? 1 : 0
+                    }}
                 >
                 </CircularProgressbarWithChildren>
             </motion.div>

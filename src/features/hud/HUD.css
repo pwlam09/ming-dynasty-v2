@@ -1,0 +1,13 @@
+.main-area {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.view-area {
+    height: 40%;
+}
+
+.game-area {
+    height: 60%;
+}

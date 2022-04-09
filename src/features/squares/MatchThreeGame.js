@@ -9,8 +9,24 @@ import ppImg from '../../assets/pp.png'
 import horseImg from '../../assets/horse.png'
 import fishPng from '../../assets/fish.png'
 import bigBroPng from '../../assets/bigbro.png'
-import { useEffect, useState } from "react"
+import { useEffect, useReducer, useRef, useState } from "react"
 import { Board } from "./Board"
+import { CircularProgressbarWithChildren } from 'react-circular-progressbar'
+import 'react-circular-progressbar/dist/styles.css'
+import { motion } from "framer-motion"
+
+const initTimerProgressReducer = (initialTimerProgress) => initialTimerProgress
+
+const timerProgressReducer = (state, action) => {
+    switch (action.type) {
+        case "countDown":
+            return state - 1
+        case 'reset':
+            return initTimerProgressReducer(action.payload)
+        default:
+            return state
+    }
+}
 
 export const MatchThreeGame = () => {
     const dispatch = useDispatch()
@@ -20,28 +36,43 @@ export const MatchThreeGame = () => {
     const numOfRow = Math.sqrt(squares.length)
     const boardMargin = 0.1
     const { height, width } = useWindowDimensions()
+    const initialTimerProgress = 5
+    const boardRef = useRef()
 
     const minScreenSize = height < width ? height : width
     const squareWidth = minScreenSize * (1-boardMargin*2) / numOfSquaresPerRow
     const squareHeight = minScreenSize * (1-boardMargin*2) / numOfSquaresPerRow
 
-    const desktopSensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(TouchSensor)
-    )
+    const desktopSensors = useSensors(useSensor(PointerSensor))
     const mobileSensors = useSensors(useSensor(TouchSensor))
 
+    // Squares refill/animations
     const [shouldRefill, setShouldRefill] = useState(false)
     const [animationStarted, setAnimationStarted] = useState(false)
 
+    // Drag timer
+    const [dragTimer, setDragTimer] = useState({
+        show: false,
+        x: 0, 
+        y: 0
+    })
+    const [dragTimerIntervalId, setDragTimerIntervalId] = useState(null)
+    const [stateTimerProgress, dispatchTimerProgress] = useReducer(timerProgressReducer, initialTimerProgress, initTimerProgressReducer)
+
     useEffect(() => {
         if (shouldRefill) {
-            refillSquares()
+            // refillSquares()
             setShouldRefill(false)
             dispatch(sqauresGetNewImg(squares.filter((square) => !square.show)))
             dispatch(squaresToggled(squares.filter((square) => !square.show)))
         }
     }, [shouldRefill])
+
+    useEffect(() => {
+        if (stateTimerProgress <= 0) {
+            handleOnDragEnd()
+        }
+    }, [stateTimerProgress])
 
     const calculateSquaresChanged = () => {
         const checkComboInRow = (row) => {
@@ -174,12 +205,47 @@ export const MatchThreeGame = () => {
         return result
     }
 
+    const handleOnMouseMove = (e) => {
+        const relativeCoordinates = getRelativeCoordinates(e, boardRef.current)
+        setDragTimer({
+            ...dragTimer,
+            x: relativeCoordinates.x, 
+            y: relativeCoordinates.y
+        })
+    }
+
+    const handleOnDragOver = () => {
+        if (dragTimerIntervalId == null) {
+            dispatchTimerProgress({ type: 'reset', payload: initialTimerProgress })
+            setDragTimer({
+                ...dragTimer,
+                show: true
+            })
+            setDragTimerIntervalId(
+                setInterval(() => {
+                    dispatchTimerProgress({ type: 'countDown' })
+                }, 1000)
+            )
+        }
+    }
+
     const handleOnDragEnd = () => {
+        setDragTimer({
+            ...dragTimer,
+            show: false
+        })
+        if (dragTimerIntervalId != null) {
+            clearInterval(dragTimerIntervalId)
+            setDragTimerIntervalId(null)
+        }
+
         const result = calculateSquaresChanged()
         
-        setAnimationStarted(true)
         const comboSqaures = result.rowCombos.concat(result.columnCombos).concat(result.intersectedCombos).flat()
-        dispatch(squaresToggled(comboSqaures))
+        if (comboSqaures.length > 0) {
+            setAnimationStarted(true)
+            dispatch(squaresToggled(comboSqaures))
+        }
     }
 
     const refillSquares = () => {
@@ -208,10 +274,64 @@ export const MatchThreeGame = () => {
         }
     }
 
+    const getRelativeCoordinates = (event, referenceElement) => {
+        const position = {
+            x: event.pageX,
+            y: event.pageY
+        }
+
+        const offset = {
+            left: referenceElement.offsetLeft,
+            top: referenceElement.offsetTop,
+            width: referenceElement.clientWidth,
+            height: referenceElement.clientHeight
+        }
+
+        let reference = referenceElement.offsetParent;
+
+        while (reference) {
+            offset.left += reference.offsetLeft;
+            offset.top += reference.offsetTop;
+            reference = reference.offsetParent;
+        }
+
+        return {
+            x: position.x - offset.left,
+            y: position.y - offset.top,
+            width: offset.width,
+            height: offset.height,
+            centerX: (position.x - offset.left - offset.width / 2) / (offset.width / 2),
+            centerY: (position.y - offset.top - offset.height / 2) / (offset.height / 2)
+        }
+    }
+
     return (
-        <div className="board-wrapper" style={{ width: minScreenSize }}>
+        <div 
+            className="board-wrapper" 
+            style={{ width: minScreenSize }} 
+            onMouseMove={!isMobile ? handleOnMouseMove : null}
+            onPointerMove={isMobile ? handleOnMouseMove : null}
+        >
+            <motion.div className="drag-timer"
+                style={{
+                    width: squareWidth * 2/3
+                }}
+                animate={{
+                    x: dragTimer.x - squareWidth * 2/3,
+                    y: dragTimer.y - squareHeight * 2/3,
+                    opacity: dragTimer.show ? 1 : 0
+                }}
+            >
+                <CircularProgressbarWithChildren
+                    counterClockwise 
+                    value={stateTimerProgress / initialTimerProgress * 100}
+                    strokeWidth={20}
+                >
+                </CircularProgressbarWithChildren>
+            </motion.div>
             <div 
                 className="board" 
+                ref={boardRef}
                 style={{margin: boardMargin * 100 + '%'}}
             >
                 <Board 
@@ -220,6 +340,7 @@ export const MatchThreeGame = () => {
                     squareWidth={squareWidth}
                     squareHeight={squareHeight}
                     squareImgs={squareImgs}
+                    onDragOver={handleOnDragOver}
                     onDragEnd={handleOnDragEnd}
                     onAnimationComplete={handleOnAnimationComplete}
                 />

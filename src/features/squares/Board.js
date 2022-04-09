@@ -28,6 +28,8 @@ export const Board = (props) => {
             const newIndex = squares.findIndex((square) => square.id === over.id)
             dispatch(squaresUpdated(arraySwap(squares, oldIndex, newIndex)))
             setActiveIndex(newIndex)
+            
+            props.onDragOver()
         }
     }
 
@@ -48,6 +50,7 @@ export const Board = (props) => {
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
+            onDragCancel={handleDragEnd}
             collisionDetection={closestCenter}
         >
             <SortableContext items={squares} strategy={rectSwappingStrategy}>

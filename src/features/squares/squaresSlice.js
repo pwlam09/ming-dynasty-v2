@@ -1,14 +1,14 @@
 import { createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 
-const numOfSquares = 25
-const numOfImgs = 4
+const NUM_OF_SQUARES = 25
+const NUM_OF_IMGS = 4
 
 const squaresAdapter = createEntityAdapter()
 
 const initialState = squaresAdapter.getInitialState()
 const squaresXY = []
-for (let i = 0; i < numOfSquares; i++) {
-    squaresXY.push({id: `${i}`, x: 0, y: 0, img: Math.floor(Math.random() * numOfImgs), show: true })
+for (let i = 0; i < NUM_OF_SQUARES; i++) {
+    squaresXY.push({id: `${i}`, x: 0, y: 0, img: Math.floor(Math.random() * NUM_OF_IMGS), show: true })
 }
 const filledState = squaresAdapter.upsertMany(initialState, squaresXY)
 
@@ -18,8 +18,8 @@ const squaresSlice = createSlice({
     reducers: {
         initializeSquares(state, action) {
             const squaresXY = []
-            for (let i = 0; i < numOfSquares; i++) {
-                squaresXY.push({id: `${i}`, x: 0, y: 0, img: Math.floor(Math.random() * numOfImgs)})
+            for (let i = 0; i < NUM_OF_SQUARES; i++) {
+                squaresXY.push({id: `${i}`, x: 0, y: 0, img: Math.floor(Math.random() * NUM_OF_IMGS), show: true })
             }
             squaresAdapter.upsertMany(initialState, squaresXY)
         },
@@ -40,7 +40,7 @@ const squaresSlice = createSlice({
         sqauresGetNewImg(state, action) {
             const squares = action.payload
             for (let i = 0; i < squares.length; i++) {
-                state.entities[squares[i].id].img = Math.floor(Math.random() * numOfImgs)
+                state.entities[squares[i].id].img = Math.floor(Math.random() * NUM_OF_IMGS)
             }
         }
     }

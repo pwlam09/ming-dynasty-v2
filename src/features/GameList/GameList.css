@@ -1,0 +1,11 @@
+.game-list {
+    height: var(--app-height);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.game-name {
+    font-size: 3rem;
+    cursor: pointer;
+}

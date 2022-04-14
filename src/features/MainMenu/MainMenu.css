@@ -1,0 +1,41 @@
+.menu {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1%;
+}
+
+.game-title {
+    font-size: 4rem;
+}
+
+.character-img-group-wrapper {
+    display: flex;
+    padding: 15%;
+}
+
+.character-img-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: center;
+}
+
+.character-symbol-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.character-img {
+    width: 40%;
+}
+
+.click-to-start {
+    font-size: 2rem;
+}

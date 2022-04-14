@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
-import pingPongReducer from '../features/pingpong/pingPongSlice'
-import squaresReducer from '../features/squares/squaresSlice'
+import pingPongReducer from '../features/PingPong/pingPongSlice'
+import squaresReducer from '../features/Squares/squaresSlice'
 
 export default configureStore({
   reducer: {

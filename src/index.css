@@ -1,7 +1,14 @@
-@import './features/pingpong/pingPong.css';
-@import './features/characters/character.css';
-@import './features/squares/Squares.css';
-@import './features/hud/HUD.css';
+@font-face {
+  font-family: 'LanaPixel';
+  src: URL('./assets/fonts/LanaPixel.ttf') format('truetype');
+}
+
+@import './features/MainMenu/MainMenu.css';
+@import './features/GameList/GameList.css';
+@import './features/PingPong/PingPong.css';
+@import './features/Characters/Character.css';
+@import './features/Squares/Squares.css';
+@import './features/HUD/HUD.css';
 
 :root {
   --app-height: 100%;

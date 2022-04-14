@@ -1,3 +1,4 @@
+@import './features/pingpong/pingPong.css';
 @import './features/characters/character.css';
 @import './features/squares/Squares.css';
 @import './features/hud/HUD.css';

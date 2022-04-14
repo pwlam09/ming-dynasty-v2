@@ -325,22 +325,19 @@ export const MatchThreeGame = ({ parentRef }) => {
         >
             <motion.div className="drag-timer"
                 style={{
-                    width: squareWidth * 2/3,
-                    visibility: dragTimer.show ? 'inherit' : 'hidden'
+                    width: squareWidth * 2/3
                 }}
                 animate={{
                     x: dragTimer.x - squareWidth * 2/3,
                     y: dragTimer.y - squareHeight * 2/3,
                     opacity: dragTimer.show ? 1 : 0
                 }}
+                initial={false}
             >
                 <CircularProgressbarWithChildren
                     counterClockwise 
                     value={stateTimerProgress / initialTimerProgress * 100}
                     strokeWidth={20}
-                    style={{
-                        opacity: dragTimer.show ? 1 : 0
-                    }}
                 >
                 </CircularProgressbarWithChildren>
             </motion.div>

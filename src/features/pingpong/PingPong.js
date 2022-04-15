@@ -1,5 +1,3 @@
-import { faCircleArrowLeft, faCircleArrowRight } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { motion, useAnimation } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import tntImg from "../../assets/pixel-TNT.png"
@@ -8,6 +6,10 @@ import doorLeafOpenImg from "../../assets/doors_leaf_open.png"
 import doorFrameTopImg from "../../assets/doors_frame_top.png"
 import doorFrameLeftImg from "../../assets/doors_frame_left.png"
 import doorFrameRightImg from "../../assets/doors_frame_righ.png"
+import buttonLeftImg from "../../assets/controls/button_left.png"
+import buttonLeftPressedImg from "../../assets/controls/button_left_pressed.png"
+import buttonRightImg from "../../assets/controls/button_right.png"
+import buttonRightPressedImg from "../../assets/controls/button_right_pressed.png"
 
 export const PingPong = ({ gameAreaWidth }) => {
     const gameBoundingRectRef = useRef()
@@ -111,11 +113,11 @@ export const PingPong = ({ gameAreaWidth }) => {
                     } else {
                         x = x - targetRect.width / 2
                     }
-                    const y = Math.random() * (wallRect.height * 0.75)
+                    const y = Math.random() * (wallRect.height * 0.75 - 100) + 100
                     animations.push({ x, y })
                 }
             }
-            animations = [{ x: 0, y: 0 }, ...animations]
+            animations = [...animations]
             setTargetAnimations(animations)
             setCurrTargetAnimation(animations[0])
 
@@ -167,7 +169,6 @@ export const PingPong = ({ gameAreaWidth }) => {
                 ) : null} 
                 <img className="door" src={doorFrameRightImg} />
             </div>
-            {/* Opponent */}
         </div>
     )
 
@@ -179,14 +180,15 @@ export const PingPong = ({ gameAreaWidth }) => {
                 style={{
                     visibility: gameStart ? 'inherit' : 'hidden'
                 }}
+                initial={{ x: 0, y: 0 }}
                 animate={targetAnimationControls}
-                transition={{ ease: "easeOut", duration: 1 }}
+                transition={{ ease: "easeOut", duration: 2 }}
                 onAnimationComplete={() => {
                     if (targetAnimations && targetAnimations.length > 0) {
                         const nextIndex = (targetAnimations.findIndex((a) => a.y === currTargetAnimation.y) + 1) % targetAnimations.length
                         console.log(nextIndex, targetAnimations)
-                        setCurrTargetAnimation(targetAnimations[nextIndex])
-                        targetAnimationControls.start(targetAnimations[nextIndex])
+                        setCurrTargetAnimation(targetAnimations[nextIndex == -1 ? 0 : nextIndex])
+                        targetAnimationControls.start(targetAnimations[nextIndex == -1 ? 0 : nextIndex])
                     }
                 }}
             >
@@ -199,10 +201,6 @@ export const PingPong = ({ gameAreaWidth }) => {
         <motion.div 
             ref={playerSlideRef}
             className="player-slide"
-            onClick={() => {
-                setGameStart(true)
-                setTimeout(() => spawnTarget(), 0)
-            }}
             animate={{
                 x: playerPosition
             }}
@@ -216,10 +214,18 @@ export const PingPong = ({ gameAreaWidth }) => {
                 {opponent}
                 {targetObject}
                 {playerSlide}
-                <FontAwesomeIcon
-                    style={{
-                        opacity: arrowLeftClicked ? 0.75 : 0.25
-                    }}
+                {!gameStart ? (
+                    <div 
+                        className="ping-pong-click-to-start"
+                        onClick={() => {
+                            setGameStart(true)
+                            setTimeout(() => spawnTarget(), 0)
+                        }}
+                    >
+                        Click to Start
+                    </div>
+                ) : null}
+                <div
                     onMouseDown={() => {
                         movePlayer(DIRECTION_LEFT)
                         setArrowLeftClicked(true) 
@@ -231,12 +237,10 @@ export const PingPong = ({ gameAreaWidth }) => {
                     }}
                     onTouchEnd={() => { setArrowLeftClicked(false) }}
                     className="move-icon arrow-left" 
-                    icon={faCircleArrowLeft} 
-                />
-                <FontAwesomeIcon 
-                    style={{
-                        opacity: arrowRightClicked ? 0.75 : 0.25
-                    }}
+                >
+                    <img src={arrowLeftClicked ? buttonLeftPressedImg : buttonLeftImg} />
+                </div>
+                <div
                     onMouseDown={() => {
                         movePlayer(DIRECTION_RIGHT)
                         setArrowRightClicked(true)
@@ -248,8 +252,9 @@ export const PingPong = ({ gameAreaWidth }) => {
                     }}
                     onTouchEnd={() => { setArrowRightClicked(false) }}
                     className="move-icon arrow-right" 
-                    icon={faCircleArrowRight} 
-                />
+                >
+                    <img src={arrowRightClicked ? buttonRightPressedImg : buttonRightImg} />
+                </div>
             </div>
         </div>
     )

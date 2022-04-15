@@ -9,6 +9,21 @@
     height: 100%;
     border: 1px solid;
     position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.ping-pong-click-to-start {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: grey;
+    z-index: 1;
+    font-size: 2rem;
+    opacity: 0.8;
+    color: white;
 }
 
 .player-slide {
@@ -38,8 +53,12 @@
 .move-icon {
     position: absolute;
     bottom: 40%;
-    font-size: 4rem;
-    opacity: 0.25;
+    opacity: 0.5;
+    width: 15%;
+}
+
+.move-icon img {
+    width: 100%;
 }
 
 .arrow-left {

@@ -4,6 +4,7 @@
 }
 
 @import './features/MainMenu/MainMenu.css';
+@import './features/Settings/Settings.css';
 @import './features/GameList/GameList.css';
 @import './features/PingPong/PingPong.css';
 @import './features/Characters/Character.css';

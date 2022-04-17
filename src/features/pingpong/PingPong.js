@@ -1,5 +1,5 @@
 import { motion, useAnimation } from "framer-motion"
-import { useEffect, useRef, useState } from "react"
+import { cloneElement, useEffect, useRef, useState } from "react"
 import tntImg from "../../assets/pixel-TNT.png"
 import doorLeafCloseImg from "../../assets/doors_leaf_closed.png"
 import doorLeafOpenImg from "../../assets/doors_leaf_open.png"
@@ -10,24 +10,23 @@ import buttonLeftImg from "../../assets/controls/button_left.png"
 import buttonLeftPressedImg from "../../assets/controls/button_left_pressed.png"
 import buttonRightImg from "../../assets/controls/button_right.png"
 import buttonRightPressedImg from "../../assets/controls/button_right_pressed.png"
+import { BEGINNER, DEFAULT_TARGET_MOVE_DURATION, DIRECTION_LEFT, DIRECTION_RIGHT, KEY_LEFT, KEY_RIGHT } from "./PingPong.constants"
+import { Target } from "./Target"
 
 export const PingPong = ({ gameAreaWidth }) => {
     const gameBoundingRectRef = useRef()
     const targetRef = useRef()
     const playerSlideRef = useRef()
-    const KEY_LEFT = 37
-    const KEY_RIGHT = 39
     const DISPLACEMENT = gameAreaWidth * 0.075
-    const DIRECTION_LEFT = 'left'
-    const DIRECTION_RIGHT = 'right'
     const [arrowLeftClicked, setArrowLeftClicked] = useState(false)
     const [arrowRightClicked, setArrowRightClicked] = useState(false)
     const [gameStart, setGameStart] = useState(false)
     const [playerPosition, setPlayerPosition] = useState(0)
     const [targetAnimations, setTargetAnimations] = useState([])
-    const [currTargetAnimation, setCurrTargetAnimation] = useState([{ x: 0, y: 0 }])
+    const [currTargetAnimation, setCurrTargetAnimation] = useState([{ x: 0, y: 0, duration: DEFAULT_TARGET_MOVE_DURATION }])
     const targetAnimationControls = useAnimation()
     const targetCollisionRef = useRef()
+    const [difficulty, setDifficulty] = useState(BEGINNER)
 
     useEffect(() => {
         return () => {
@@ -54,9 +53,10 @@ export const PingPong = ({ gameAreaWidth }) => {
             console.log('isTargetGet', isTargetGet, 'isTargetLoss', isTargetLoss)
 
             targetAnimationControls.stop()
-            await targetAnimationControls.start({ opacity: 0 })
+            await targetAnimationControls.start({ opacity: 0, transition: { duration: 0.5 } })
             
             setTargetAnimations([])
+            setCurrTargetAnimation(null)
             setGameStart(false)
         }
     }
@@ -93,18 +93,39 @@ export const PingPong = ({ gameAreaWidth }) => {
         }
     }
 
+    const spawnTargetBeginner = () => {
+        if (targetRef && targetRef.current && gameBoundingRectRef && gameBoundingRectRef.current) {
+            const targetRect = targetRef.current.getBoundingClientRect()
+            const wallRect = gameBoundingRectRef.current.getBoundingClientRect()
+            const animations = []
+            const defaultX = Math.random() * (wallRect.width - targetRect.width) - (wallRect.width - targetRect.width) / 2
+            animations.push({ x: defaultX, y: 0, duration: 0.5 })
+            animations.push({ x: defaultX, y: wallRect.height, duration: DEFAULT_TARGET_MOVE_DURATION })
+            setTargetAnimations(animations)
+            setCurrTargetAnimation(animations[0])
+
+            targetCollisionRef.current = setInterval(() => {
+                console.log('start check!')
+                checkTargetState()
+            }, 100)
+    
+            targetAnimationControls.start(animations[0])
+        }
+    }
+
     const spawnTarget = async () => {
         if (targetRef && targetRef.current && gameBoundingRectRef && gameBoundingRectRef.current) {
             const targetRect = targetRef.current.getBoundingClientRect()
             const wallRect = gameBoundingRectRef.current.getBoundingClientRect()
-            let animations = []
+            const animations = []
             const defaultX = wallRect.width / 2
             while (animations.length == 0 || animations[animations.length-1].y < wallRect.height) {
                 if (animations.length > 0) {
                     const lastToLeft = animations[animations.length-1].x < 0 ? true : false
                     const x = defaultX * (lastToLeft ? 1 : -1) + (lastToLeft ? -targetRect.width / 2 : targetRect.width / 2)
                     const y = animations[animations.length-1].y + animations[0].y * 2
-                    animations.push({ x, y })
+                    const prevY = animations[animations.length-1].y
+                    animations.push({ x, y, duration: y / (y - prevY) * DEFAULT_TARGET_MOVE_DURATION })
                 } else {
                     let x = defaultX * (Math.round(Math.random()) * 2 - 1)
                     const toLeft = x < 0 ? true : false
@@ -114,10 +135,9 @@ export const PingPong = ({ gameAreaWidth }) => {
                         x = x - targetRect.width / 2
                     }
                     const y = Math.random() * (wallRect.height * 0.75 - 100) + 100
-                    animations.push({ x, y })
+                    animations.push({ x, y, duration: DEFAULT_TARGET_MOVE_DURATION })
                 }
             }
-            animations = [...animations]
             setTargetAnimations(animations)
             setCurrTargetAnimation(animations[0])
 
@@ -156,10 +176,10 @@ export const PingPong = ({ gameAreaWidth }) => {
 
     const opponent = (
         <div className="opponent">
-            <div>
+            <div className="door-wrapper">
                 <img className="door door-top" src={doorFrameTopImg} />
             </div>
-            <div>
+            <div className="door-wrapper">
                 <img className="door" src={doorFrameLeftImg} />
                 {!(currTargetAnimation && targetAnimations.length > 0 && currTargetAnimation.y === targetAnimations[0].y) ? (
                     <img className="door door-main" src={doorLeafCloseImg} />
@@ -174,26 +194,12 @@ export const PingPong = ({ gameAreaWidth }) => {
 
     const targetObject = (
         gameStart ? (
-            <motion.div 
+            <Target 
                 ref={targetRef}
-                className="tnt"
-                style={{
-                    visibility: gameStart ? 'inherit' : 'hidden'
-                }}
-                initial={{ x: 0, y: 0 }}
-                animate={targetAnimationControls}
-                transition={{ ease: "easeOut", duration: 2 }}
-                onAnimationComplete={() => {
-                    if (targetAnimations && targetAnimations.length > 0) {
-                        const nextIndex = (targetAnimations.findIndex((a) => a.y === currTargetAnimation.y) + 1) % targetAnimations.length
-                        console.log(nextIndex, targetAnimations)
-                        setCurrTargetAnimation(targetAnimations[nextIndex == -1 ? 0 : nextIndex])
-                        targetAnimationControls.start(targetAnimations[nextIndex == -1 ? 0 : nextIndex])
-                    }
-                }}
-            >
-                <img src={tntImg} />
-            </motion.div>
+                targetAnimationControls={targetAnimationControls}
+                targetImg={tntImg}
+                targetAnimations={targetAnimations}
+            />
         ) : null
     )
 
@@ -211,7 +217,7 @@ export const PingPong = ({ gameAreaWidth }) => {
     return (
         <div className="ping-pong-wrapper">
             <div ref={gameBoundingRectRef} className="ping-pong">
-                {opponent}
+                {/* {opponent} */}
                 {targetObject}
                 {playerSlide}
                 {!gameStart ? (
@@ -219,7 +225,7 @@ export const PingPong = ({ gameAreaWidth }) => {
                         className="ping-pong-click-to-start"
                         onClick={() => {
                             setGameStart(true)
-                            setTimeout(() => spawnTarget(), 0)
+                            setTimeout(() => spawnTargetBeginner(), 0)
                         }}
                     >
                         Click to Start

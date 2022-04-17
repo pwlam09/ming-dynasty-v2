@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/ming-dynasty-2.0/static/css/main.ec5b1099.css",
+    "main.js": "/ming-dynasty-2.0/static/js/main.b4b73fc6.js",
+    "static/js/787.5dbb482b.chunk.js": "/ming-dynasty-2.0/static/js/787.5dbb482b.chunk.js",
+    "static/media/LanaPixel.ttf": "/ming-dynasty-2.0/static/media/LanaPixel.775f7a4477cade801d53.ttf",
+    "index.html": "/ming-dynasty-2.0/index.html",
+    "main.ec5b1099.css.map": "/ming-dynasty-2.0/static/css/main.ec5b1099.css.map",
+    "main.b4b73fc6.js.map": "/ming-dynasty-2.0/static/js/main.b4b73fc6.js.map",
+    "787.5dbb482b.chunk.js.map": "/ming-dynasty-2.0/static/js/787.5dbb482b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ec5b1099.css",
+    "static/js/main.b4b73fc6.js"
+  ]
+}

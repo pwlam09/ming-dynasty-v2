@@ -6,6 +6,12 @@ import buttonExitPressedImg from "../../assets/controls/button_exit_pressed.png"
 export const Settings = (props) => {
     return (
         <div className="settings-wrapper">
+            <div 
+                className="settings-overlay" 
+                onMouseUp={() => {
+                    props.onMouseUpBack()
+                }}
+            />
             <div className="settings">
                 <img 
                     onMouseDown={(e) => e.target.src = buttonExitPressedImg}
